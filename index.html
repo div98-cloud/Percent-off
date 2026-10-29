@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<title>Percent Off</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: one narrow column. Inputs first, then a swing-tag style result card below. */
+  :root {
+    --bg: #ECEEF1;
+    --surface: #FFFFFF;
+    --ink: #15181D;
+    --muted: #596070;
+    --line: #D3D8DF;
+    --accent: #D63A1F;
+    --accent-ink: #FFFFFF;
+    --sel-bg: #15181D;
+    --sel-ink: #FFFFFF;
+    --font-ui: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-num: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111317;
+      --surface: #1A1D23;
+      --ink: #ECEEF2;
+      --muted: #9AA1AD;
+      --line: #2E333C;
+      --accent: #FF6A4D;
+      --accent-ink: #1A0B07;
+      --sel-bg: #ECEEF2;
+      --sel-ink: #111317;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #111317;
+    --surface: #1A1D23;
+    --ink: #ECEEF2;
+    --muted: #9AA1AD;
+    --line: #2E333C;
+    --accent: #FF6A4D;
+    --accent-ink: #1A0B07;
+    --sel-bg: #ECEEF2;
+    --sel-ink: #111317;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    font-size: 16px;
+    line-height: 1.45;
+    padding-block: 32px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  .wrap {
+    max-width: 30rem;
+    margin: 0 auto;
+    display: grid;
+    gap: 22px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 750;
+    font-stretch: 112%;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .lede { margin: 6px 0 0; color: var(--muted); }
+
+  form { display: grid; gap: 20px; }
+
+  label, legend {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0;
+  }
+  .field { display: grid; gap: 8px; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 14px; }
+  legend { margin-bottom: 8px; }
+
+  .money {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 52px;
+    padding: 0 14px;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: var(--font-num);
+    font-size: 1.25rem;
+  }
+  .money:focus-within { border-color: var(--ink); outline: 2px solid var(--ink); outline-offset: 2px; }
+  .money input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    padding: 12px 0;
+  }
+  .money input::placeholder { color: var(--muted); opacity: 0.6; }
+  .money .unit { font-size: 1rem; }
+
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .opt { position: relative; display: block; text-transform: none; letter-spacing: 0; }
+  .opt input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+  .box {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 2px;
+    min-height: 80px;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    color: var(--ink);
+    transition: border-color 0.12s;
+  }
+  .box b { font-family: var(--font-num); font-size: 1.75rem; font-weight: 500; line-height: 1; }
+  .box i { font-style: normal; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.7; }
+  .opt:hover .box { border-color: var(--ink); }
+  .opt input:checked + .box { background: var(--sel-bg); color: var(--sel-ink); border-color: var(--sel-bg); }
+  .opt input:focus-visible + .box { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  .err { margin: 0; color: var(--accent); font-weight: 600; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  button {
+    font: inherit;
+    font-weight: 650;
+    min-height: 52px;
+    padding: 0 22px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .primary { flex: 1 1 10rem; background: var(--accent); color: var(--accent-ink); border: 1.5px solid var(--accent); }
+  .primary:hover { filter: brightness(0.94); }
+  .ghost { flex: 0 1 auto; background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+  .ghost:hover { border-color: var(--ink); }
+
+  /* Result card, styled like a swing tag with a punched hole and a perforated line */
+  .tag {
+    position: relative;
+    background: var(--surface);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 40px 22px 20px;
+  }
+  .tag::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 1.5px solid var(--line);
+  }
+  .k { margin: 0; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  .now {
+    margin: 4px 0 0;
+    font-family: var(--font-num);
+    font-size: clamp(2.25rem, 12vw, 3.25rem);
+    font-weight: 500;
+    line-height: 1.1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+  .was {
+    margin: 4px 0 0;
+    font-family: var(--font-num);
+    color: var(--muted);
+    text-decoration: line-through;
+    font-variant-numeric: tabular-nums;
+  }
+  .rows {
+    margin: 18px 0 0;
+    padding-top: 14px;
+    border-top: 2px dashed var(--line);
+    display: grid;
+    gap: 8px;
+  }
+  .rows div { display: flex; justify-content: space-between; gap: 16px; }
+  .rows dt { color: var(--muted); }
+  .rows dd { margin: 0; font-family: var(--font-num); font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
+  .hint { margin: 14px 0 0; color: var(--muted); font-size: 0.9375rem; }
+
+  .tag[data-state="empty"] .now { color: var(--muted); }
+  .tag[data-stale="true"] .now,
+  .tag[data-stale="true"] .rows,
+  .tag[data-stale="true"] .was { opacity: 0.4; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .box { transition: none; }
+  }
+</style>
+
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>Percent off</h1>
+    <p class="lede">Enter a price, pick a discount, then press Calculate.</p>
+  </header>
+
+  <form id="calc" novalidate>
+    <div class="field">
+      <label for="price">Original price</label>
+      <div class="money">
+        <span aria-hidden="true">£</span>
+        <input id="price" type="text" inputmode="decimal" autocomplete="off" placeholder="79.99" value="79.99">
+      </div>
+    </div>
+
+    <fieldset>
+      <legend>Discount</legend>
+      <div class="grid">
+        <label class="opt"><input type="radio" name="off" value="30"><span class="box"><b>30%</b><i>off</i></span></label>
+        <label class="opt"><input type="radio" name="off" value="50" checked><span class="box"><b>50%</b><i>off</i></span></label>
+        <label class="opt"><input type="radio" name="off" value="70"><span class="box"><b>70%</b><i>off</i></span></label>
+      </div>
+      <div class="field">
+        <label for="custom">Or enter your own</label>
+        <div class="money">
+          <input id="custom" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 15">
+          <span class="unit">% off</span>
+        </div>
+      </div>
+    </fieldset>
+
+    <p id="err" class="err" role="alert" hidden></p>
+
+    <div class="actions">
+      <button type="submit" id="go" class="primary">Calculate</button>
+      <button type="button" id="reset" class="ghost">Refresh</button>
+    </div>
+  </form>
+
+  <section id="result" class="tag" aria-live="polite" data-state="empty" data-stale="false">
+    <p class="k">Sale price</p>
+    <p class="now" id="now">—</p>
+    <p class="was" id="was" hidden></p>
+    <dl class="rows">
+      <div><dt>Discount</dt><dd id="r-pct">—</dd></div>
+      <div><dt>You save</dt><dd id="r-save">—</dd></div>
+    </dl>
+    <p class="hint" id="hint">Enter a price and choose a discount to see the sale price.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var form = document.getElementById('calc');
+  var priceEl = document.getElementById('price');
+  var customEl = document.getElementById('custom');
+  var errEl = document.getElementById('err');
+  var tag = document.getElementById('result');
+  var nowEl = document.getElementById('now');
+  var wasEl = document.getElementById('was');
+  var pctEl = document.getElementById('r-pct');
+  var saveEl = document.getElementById('r-save');
+  var hintEl = document.getElementById('hint');
+  var radios = Array.prototype.slice.call(document.querySelectorAll('input[name="off"]'));
+  var gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
+  var EMPTY_HINT = 'Enter a price and choose a discount to see the sale price.';
+  var STALE_HINT = 'Inputs changed. Press Calculate to update.';
+
+  function num(s) {
+    var t = String(s).replace(/[£,%\s]/g, '');
+    return /^(\d+\.?\d*|\.\d+)$/.test(t) ? parseFloat(t) : NaN;
+  }
+  function fmtPct(p) { return (Math.round(p * 100) / 100) + '%'; }
+  function showError(msg, el) {
+    errEl.textContent = msg;
+    errEl.hidden = false;
+    if (el) { el.focus(); }
+  }
+  function clearError() { errEl.hidden = true; errEl.textContent = ''; }
+
+  function setEmpty() {
+    tag.dataset.state = 'empty';
+    tag.dataset.stale = 'false';
+    nowEl.textContent = '—';
+    wasEl.textContent = '';
+    wasEl.hidden = true;
+    pctEl.textContent = '—';
+    saveEl.textContent = '—';
+    hintEl.textContent = EMPTY_HINT;
+    hintEl.hidden = false;
+  }
+  function markStale() {
+    if (tag.dataset.state === 'filled') {
+      tag.dataset.stale = 'true';
+      hintEl.textContent = STALE_HINT;
+      hintEl.hidden = false;
+    }
+  }
+
+  function calculate() {
+    clearError();
+    var price = num(priceEl.value);
+    if (!(price > 0)) {
+      showError('Enter a price above £0, for example 79.99.', priceEl);
+      return;
+    }
+    var picked = radios.filter(function (r) { return r.checked; })[0];
+    var pct;
+    if (picked) {
+      pct = Number(picked.value);
+    } else if (customEl.value.trim() !== '') {
+      pct = num(customEl.value);
+      if (!(pct >= 0 && pct <= 100)) {
+        showError('Your own discount must be a number from 0 to 100.', customEl);
+        return;
+      }
+    } else {
+      showError('Pick 30%, 50% or 70% off, or enter your own percent.', radios[0]);
+      return;
+    }
+
+    var pence = Math.round(price * 100);
+    var salePence = Math.round(pence * (100 - pct) / 100);
+    var savePence = pence - salePence;
+
+    nowEl.textContent = gbp.format(salePence / 100);
+    wasEl.textContent = 'Was ' + gbp.format(pence / 100);
+    wasEl.hidden = false;
+    pctEl.textContent = fmtPct(pct) + ' off';
+    saveEl.textContent = gbp.format(savePence / 100);
+    tag.dataset.state = 'filled';
+    tag.dataset.stale = 'false';
+    hintEl.hidden = true;
+  }
+
+  function onChange(e) {
+    var t = e.target;
+    if (t === customEl && customEl.value !== '') {
+      radios.forEach(function (r) { r.checked = false; });
+    }
+    if (t.name === 'off') { customEl.value = ''; }
+    clearError();
+    markStale();
+  }
+
+  form.addEventListener('submit', function (e) { e.preventDefault(); calculate(); });
+  form.addEventListener('input', onChange);
+  form.addEventListener('change', onChange);
+  priceEl.addEventListener('focus', function () { priceEl.select(); });
+
+  document.getElementById('reset').addEventListener('click', function () {
+    priceEl.value = '';
+    customEl.value = '';
+    radios.forEach(function (r) { r.checked = false; });
+    clearError();
+    setEmpty();
+    priceEl.focus();
+  });
+
+  calculate();
+})();
+</script>
+
+</body>
+</html>
